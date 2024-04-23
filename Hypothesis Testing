@@ -1,0 +1,79 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import stats
+from tabulate import tabulate
+
+np.random.seed(0)
+sample_z = np.random.normal(loc=100, scale=15, size=100)
+sample_t1 = np.random.normal(loc=100, scale=15, size=50)
+sample_t2 = np.random.normal(loc=105, scale=18, size=50)
+sample_anova1 = np.random.normal(loc=100, scale=15, size=50)
+sample_anova2 = np.random.normal(loc=105, scale=18, size=50)
+sample_anova3 = np.random.normal(loc=110, scale=20, size=50)
+
+# Z-Test
+def z_test(sample, pop_mean, pop_std):
+    z_statistic = (np.mean(sample) - pop_mean) / (pop_std / np.sqrt(len(sample)))
+    p_value = stats.norm.sf(abs(z_statistic))
+    return z_statistic, p_value
+
+# T-Test
+def t_test(sample1, sample2):
+    t_statistic, p_value = stats.ttest_ind(sample1, sample2)
+    return t_statistic, p_value
+
+# ANOVA
+def anova_test(*samples):
+    f_statistic, p_value = stats.f_oneway(*samples)
+    return f_statistic, p_value
+
+results = []
+
+# Z-Test
+pop_mean = 100
+pop_std = 15
+z_stat, z_p_value = z_test(sample_z, pop_mean, pop_std)
+results.append(['Z-Test', z_stat, z_p_value])
+
+# T-Test
+t_stat, t_p_value = t_test(sample_t1, sample_t2)
+results.append(['T-Test', t_stat, t_p_value])
+
+# ANOVA
+f_stat, f_p_value = anova_test(sample_anova1, sample_anova2, sample_anova3)
+results.append(['ANOVA', f_stat, f_p_value])
+
+print(tabulate(results, headers=['Test', 'Statistic', 'P-Value'], tablefmt='grid'))
+
+# Visualize Z-Test
+plt.figure(figsize=(10, 6))
+plt.hist(sample_z, bins=20, color='skyblue', alpha=0.7, label='Sample Data')
+plt.axvline(pop_mean, color='red', linestyle='--', label='Population Mean')
+critical_region = np.linspace(stats.norm.ppf(0.025), stats.norm.ppf(0.975), 100)
+plt.fill_between(critical_region, 0, stats.norm.pdf(critical_region, loc=0, scale=1), color='yellow', alpha=0.5, label='Critical Region')
+plt.xlabel('Value')
+plt.ylabel('Frequency')
+plt.title('Z-Test')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# Visualize T-Test
+plt.figure(figsize=(10, 6))
+plt.hist(sample_t1, bins=20, color='skyblue', alpha=0.7, label='Sample 1 Data')
+plt.hist(sample_t2, bins=20, color='salmon', alpha=0.7, label='Sample 2 Data')
+plt.xlabel('Value')
+plt.ylabel('Frequency')
+plt.title('T-Test')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# Visualize ANOVA
+plt.figure(figsize=(10, 6))
+plt.boxplot([sample_anova1, sample_anova2, sample_anova3], labels=['Sample 1', 'Sample 2', 'Sample 3'])
+plt.xlabel('Sample')
+plt.ylabel('Value')
+plt.title('ANOVA')
+plt.grid(True)
+plt.show()
